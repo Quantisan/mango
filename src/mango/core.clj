@@ -4,7 +4,6 @@
   (:use [incanter core mongodb]
         [somnium.congomongo]))
 
-;; credit to: Xavier Shay
 (defn transform-column
 " Apply function f to the specified column of data and replace the column
   with new values."
