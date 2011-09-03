@@ -1,5 +1,5 @@
-(ns mango.test.core-tests
-  (:use [mango.core]
+(ns mango.test.io-tests
+  (:use [mango.io]
         [clojure.test]
         [somnium.congomongo]
         [incanter core mongodb])

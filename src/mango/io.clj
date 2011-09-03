@@ -1,4 +1,4 @@
-(ns mango.core
+(ns mango.io
   (:require [clj-time.core :as time]
             [clj-time.coerce :as time.coerce])  
   (:use [incanter core mongodb]
