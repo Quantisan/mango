@@ -9,6 +9,7 @@
 (def ds (dataset [:Date :a] [[(time/date-time 1986 10 14 4 3 27 456) 1.555]
                              [(time/date-time 1986 10 15 2 8 53 318) 2.130]
                              [(time/date-time 1986 10 16 13 4 3 563) 1.850]]))
+(def date-string "02/01/04 19:01:27")
 
 (def test-db "coretests-db")
 (def test-col :testcol)
@@ -18,7 +19,7 @@
   [] 
   (do (mongo! :db test-db)
     (->> ds
-      (transform-column :Date time.coerce/to-long)
+      (transform-col :Date time.coerce/to-long)
       (insert-dataset test-col))))
 
 (defn teardown!
@@ -32,9 +33,6 @@
      ~@body
      (teardown!)))
 
-;(deftest date-col-conversion
-  
-
 (deftest mongo-io-dataset
   (with-test-mongo       
     (is (= '(2.13 1.85)
@@ -45,6 +43,9 @@
   (with-test-mongo
     (is (= ds
            ($ (col-names ds) (fetch-ts test-col))))))
+
+(deftest read-csv
+  (is (read-oanda-csv "data/usdcad.csv")))
 
 (comment   ; can't serialize jode time
 (deftest clj-time-mongodb-interop
