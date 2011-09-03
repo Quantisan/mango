@@ -21,7 +21,10 @@
       (transform-column :Date time.coerce/to-long)
       (insert-dataset test-col))))
 
-(defn teardown! [] (drop-database! test-db))
+(defn teardown!
+" Drops test database."
+  [] 
+  (drop-database! test-db))
  
 (defmacro with-test-mongo [& body]
   `(do
@@ -41,7 +44,7 @@
 (deftest fetch-time-series
   (with-test-mongo
     (is (= ds
-           (fetch-ts test-col)))))
+           ($ (col-names ds) (fetch-ts test-col))))))
 
 (comment   ; can't serialize jode time
 (deftest clj-time-mongodb-interop
