@@ -20,10 +20,14 @@
 
 (def oanda-fmt (time.format/formatter "dd/MM/YY HH:mm:ss"))
 
+(defn parse-time
+  [string]
+  (let [fmt       (time.format/formatter "dd/MM/YY HH:mm:ss")]
+    (time.format/parse fmt string)))
+
 (defn read-oanda-csv
   [file]
-  (let [fmt       (time.format/formatter "dd/MM/YY HH:mm:ss")
-        dataset   (-> (read-dataset file :header false)
+  (let [dataset   (-> (read-dataset file :header false)
                       (col-names [:Date :Bid :Ask]))]
-    (transform-col :Date #(time.format/parse fmt %) dataset)))
+    (transform-col :Date parse-time dataset)))
                                 
