@@ -27,8 +27,17 @@
     (time.format/parse fmt string)))
 
 (defn read-ts-csv
-  [date-format file]
+  [date-format column-names file]
   (let [data   (-> (read-dataset file :header false)
-                      (col-names [:Date :Bid :Ask]))]
+                      (col-names column-names))]
     (transform-col :Date #(parse-time date-format %) data)))
+
+(defn read-oanda-csv
+" Reads a Oanda historical time series data file."
+  [file]
+  (read-ts-csv "dd/MM/YY HH:mm:ss" [:Date :Bid :Ask] file))
+
+
+
+
                                 

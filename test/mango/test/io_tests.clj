@@ -49,7 +49,12 @@
          (parse-time "dd/MM/YY HH:mm:ss" date-string))
       "parse-time")
   (is (= 1.2964 
-         (first ($ :Bid (read-ts-csv "dd/MM/YY HH:mm:ss" "data/testing.csv"))))
+         (first ($ :Bid (read-ts-csv "dd/MM/YY HH:mm:ss" 
+                                     [:Date :Bid :Ask] 
+                                     "data/testing.csv"))))
+      "read-ts-csv: checking one element")
+  (is (= 1.2964 
+         (first ($ :Bid (read-oanda-csv "data/testing.csv"))))
       "read-oanda-csv: checking one element"))
 
 (comment   ; can't serialize jode time
