@@ -21,13 +21,14 @@
 (def oanda-fmt (time.format/formatter "dd/MM/YY HH:mm:ss"))
 
 (defn parse-time
-  [string]
-  (let [fmt       (time.format/formatter "dd/MM/YY HH:mm:ss")]
+" Wrapper for clj-time.format/parse."
+  [format string]
+  (let [fmt       (time.format/formatter format)]
     (time.format/parse fmt string)))
 
-(defn read-oanda-csv
-  [file]
-  (let [dataset   (-> (read-dataset file :header false)
+(defn read-ts-csv
+  [date-format file]
+  (let [data   (-> (read-dataset file :header false)
                       (col-names [:Date :Bid :Ask]))]
-    (transform-col :Date parse-time dataset)))
+    (transform-col :Date #(parse-time date-format %) data)))
                                 

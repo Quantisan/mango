@@ -45,9 +45,12 @@
            ($ (col-names ds) (fetch-ts test-col))))))
 
 (deftest read-csv
-  (is (= (time/date-time 2004 01 02 19 01 27) (parse-time date-string))
+  (is (= (time/date-time 2004 01 02 19 01 27) 
+         (parse-time "dd/MM/YY HH:mm:ss" date-string))
       "parse-time")
-  (is (= 1.2964 (first ($ :Bid (read-oanda-csv "data/testing.csv"))))))
+  (is (= 1.2964 
+         (first ($ :Bid (read-ts-csv "dd/MM/YY HH:mm:ss" "data/testing.csv"))))
+      "read-oanda-csv: checking one element"))
 
 (comment   ; can't serialize jode time
 (deftest clj-time-mongodb-interop
