@@ -16,7 +16,7 @@
 
 (def ^{:private true} db (make-connection test-db))
 
-(defn setup! 
+(defn fill-db! 
 " Open connection and populate database."  
   [] 
   (with-mongo db
@@ -31,23 +31,25 @@
     (drop-database! test-db)))
  
 (defmacro with-test-mongo [& body]
-  `(do
-     (setup!)
-     ~@body
+  `(do ~@body
      (teardown!)))
 
 (deftest mongo-io-dataset
-  (with-test-mongo       
-    (is (= '(2.13 1.85)
-           (with-mongo db
-             ($ :a (fetch-dataset test-coll :where {:Date {:$gt 529646607456}}))))
-        "query on epoch time")))
+  (with-test-mongo
+    (with-mongo db
+      (is (push-ts test-coll ds))
+      (is (= 1.555
+             (first ($ :a (fetch-ts test-coll)))))
+      (is (= '(2.13 1.85)
+             ($ :a (fetch-dataset test-coll :where {:Date {:$gt 529646607456}})))
+          "query on epoch time"))))
 
 (deftest fetch-time-series
   (with-test-mongo
-    (is (= ds
-           (with-mongo db
-             ($ (col-names ds) (fetch-ts test-coll)))))))
+    (do (fill-db!)
+      (with-mongo db
+        (is (= ds
+               ($ (col-names ds) (fetch-ts test-coll))))))))
 
 (deftest read-csv
   (is (= (time/date-time 2004 01 02 19 01 27) 

@@ -18,12 +18,12 @@
   (transform-col :Date time.coerce/to-long dataset))
 
 (defn fetch-ts
-" Fetch time-series data from MongoDB. Wrap in with-mongo."
+" Fetch time-series data from MongoDB. Wrap inside with-mongo."
   [db-coll]
     (long->date (fetch-dataset db-coll)))
 
 (defn push-ts
-" Push time-series data to MongoDB. Wrap in with-mongo."
+" Push time-series data to MongoDB. Wrap inside with-mongo."
   [db-coll dataset]
   (do 
     (add-index! db-coll [:Date] :unique true)
