@@ -19,7 +19,7 @@
   [] 
   (do (mongo! :db test-db)
     (->> ds
-      (transform-col :Date time.coerce/to-long)
+      (date->long)
       (insert-dataset test-col))))
 
 (defn teardown!
@@ -56,9 +56,3 @@
   (is (= 1.2964 
          (first ($ :Bid (read-oanda-csv "data/testing.csv"))))
       "read-oanda-csv: checking one element"))
-
-(comment   ; can't serialize jode time
-(deftest clj-time-mongodb-interop
-  (with-test-mongo
-    (is (insert! test-col {:Date (time/date-time 1999 10 01)}))))
-)
