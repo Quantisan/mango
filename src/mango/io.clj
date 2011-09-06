@@ -31,8 +31,6 @@
       (date->long)
       (insert-dataset db-coll))))
 
-(def oanda-fmt (time.format/formatter "dd/MM/YY HH:mm:ss"))
-
 (defn parse-time
 " Wrapper for clj-time.format/parse."
   [format string]
@@ -40,6 +38,13 @@
     (time.format/parse fmt string)))
 
 (defn read-ts-csv
+" Reads a generic time-series csv file.
+  
+  Parameters:
+  date-format   A date/time parsing format string, e.g. \"ddMMYY\"
+  column-names  a list of column names
+  file          path and filename
+"
   [date-format column-names file]
   (let [data   (-> (read-dataset file :header false)
                       (col-names column-names))]
@@ -48,9 +53,11 @@
 (defn read-oanda-csv
 " Reads a Oanda historical time series data file."
   [file]
-  (read-ts-csv "dd/MM/YY HH:mm:ss" [:Date :Bid :Ask] file))
+  (let [oanda-format "dd/MM/YY HH:mm:ss"]
+    (read-ts-csv oanda-format [:Date :Bid :Ask] file)))
 
 (defn csv->mongo
+" Reads a time-series csv file and dumps into mongo."  
   [db db-coll csv-fn file]
   (let [data   (csv-fn file)
         data   (date->long data)]
