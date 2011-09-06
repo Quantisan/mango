@@ -2,10 +2,12 @@
   (:require [clj-time.core :as time]
             [clj-time.coerce :as time.coerce]
             [clj-time.format :as time.format])  
-  (:use [somnium.congomongo :only (add-index!)]
+  (:use [somnium.congomongo :only (add-index! make-connection with-mongo)]
         [incanter core 
          (io :only (read-dataset)) 
          (mongodb :only (fetch-dataset insert-dataset))]))
+
+(def ^{:private true} db (make-connection "oanda"))
 
 (defn long->date
   [dataset]
@@ -16,8 +18,18 @@
   (transform-col :Date time.coerce/to-long dataset))
 
 (defn fetch-ts
-  [db-col]
-  (long->date (fetch-dataset db-col)))
+  [db db-coll]
+  (with-mongo db
+    (long->date (fetch-dataset db-coll))))
+
+(defn push-ts
+  [db db-coll dataset]
+  (with-mongo db
+    (do 
+      (add-index! db-coll [:Date] :unique true)
+      (->> dataset
+        (date->long)
+        (insert-dataset db-coll)))))
 
 (def oanda-fmt (time.format/formatter "dd/MM/YY HH:mm:ss"))
 
@@ -39,11 +51,7 @@
   (read-ts-csv "dd/MM/YY HH:mm:ss" [:Date :Bid :Ask] file))
 
 (defn csv->mongo
-  [db-coll csv-fn file]
+  [db db-coll csv-fn file]
   (let [data   (csv-fn file)
         data   (date->long data)]
-    (do 
-      (add-index! db-coll [:Date] :unique true)
-      (insert-dataset data))))
-
-                                
+    (push-ts db db-coll data)))

@@ -12,20 +12,23 @@
 (def date-string "02/01/04 19:01:27")
 
 (def test-db "coretests-db")
-(def test-col :testcol)
+(def test-coll :testcoll)
+
+(def ^{:private true} db (make-connection test-db))
 
 (defn setup! 
 " Open connection and populate database."  
   [] 
-  (do (mongo! :db test-db)
+  (with-mongo db
     (->> ds
       (date->long)
-      (insert-dataset test-col))))
+      (insert-dataset test-coll))))
 
 (defn teardown!
 " Drops test database."
   [] 
-  (drop-database! test-db))
+  (with-mongo db
+    (drop-database! test-db)))
  
 (defmacro with-test-mongo [& body]
   `(do
@@ -36,13 +39,14 @@
 (deftest mongo-io-dataset
   (with-test-mongo       
     (is (= '(2.13 1.85)
-           ($ :a (fetch-dataset test-col :where {:Date {:$gt 529646607456}})))
+           (with-mongo db
+             ($ :a (fetch-dataset test-coll :where {:Date {:$gt 529646607456}}))))
         "query on epoch time")))
 
 (deftest fetch-time-series
   (with-test-mongo
     (is (= ds
-           ($ (col-names ds) (fetch-ts test-col))))))
+           ($ (col-names ds) (fetch-ts db test-coll))))))
 
 (deftest read-csv
   (is (= (time/date-time 2004 01 02 19 01 27) 
