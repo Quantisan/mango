@@ -2,12 +2,12 @@
   (:require [clj-time.core :as time]
             [clj-time.coerce :as time.coerce]
             [clj-time.format :as time.format])  
-  (:use [somnium.congomongo :only (add-index! make-connection with-mongo)]
+  (:use [somnium.congomongo :only (add-index!)]
         [incanter core 
          (io :only (read-dataset)) 
          (mongodb :only (fetch-dataset insert-dataset))]))
 
-(def ^{:private true} db (make-connection "oanda"))
+;(def ^{:private true} db (make-connection "oanda"))
 
 (defn long->date
   [dataset]
@@ -18,18 +18,18 @@
   (transform-col :Date time.coerce/to-long dataset))
 
 (defn fetch-ts
-  [db db-coll]
-  (with-mongo db
-    (long->date (fetch-dataset db-coll))))
+" Fetch time-series data from MongoDB. Wrap in with-mongo."
+  [db-coll]
+    (long->date (fetch-dataset db-coll)))
 
 (defn push-ts
-  [db db-coll dataset]
-  (with-mongo db
-    (do 
-      (add-index! db-coll [:Date] :unique true)
-      (->> dataset
-        (date->long)
-        (insert-dataset db-coll)))))
+" Push time-series data to MongoDB. Wrap in with-mongo."
+  [db-coll dataset]
+  (do 
+    (add-index! db-coll [:Date] :unique true)
+    (->> dataset
+      (date->long)
+      (insert-dataset db-coll))))
 
 (def oanda-fmt (time.format/formatter "dd/MM/YY HH:mm:ss"))
 

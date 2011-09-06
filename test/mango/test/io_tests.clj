@@ -46,7 +46,8 @@
 (deftest fetch-time-series
   (with-test-mongo
     (is (= ds
-           ($ (col-names ds) (fetch-ts db test-coll))))))
+           (with-mongo db
+             ($ (col-names ds) (fetch-ts test-coll)))))))
 
 (deftest read-csv
   (is (= (time/date-time 2004 01 02 19 01 27) 
