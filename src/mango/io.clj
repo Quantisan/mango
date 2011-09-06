@@ -58,7 +58,6 @@
 
 (defn csv->mongo
 " Reads a time-series csv file and dumps into mongo."  
-  [db db-coll csv-fn file]
-  (let [data   (csv-fn file)
-        data   (date->long data)]
-    (push-ts db db-coll data)))
+  [db-coll csv-fn file]
+  (let [data   (csv-fn file)]
+    (push-ts db-coll data)))

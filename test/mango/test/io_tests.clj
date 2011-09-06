@@ -11,45 +11,49 @@
                              [(time/date-time 1986 10 16 13 4 3 563) 1.850]]))
 (def date-string "02/01/04 19:01:27")
 
+(def test-file "data/testing.csv")
 (def test-db "coretests-db")
 (def test-coll :testcoll)
 
 (def ^{:private true} db (make-connection test-db))
 
 (defn fill-db! 
-" Open connection and populate database."  
+" Populate database with test data."  
   [] 
-  (with-mongo db
-    (->> ds
-      (date->long)
-      (insert-dataset test-coll))))
+  (->> ds
+    (date->long)
+    (insert-dataset test-coll)))
 
 (defn teardown!
 " Drops test database."
   [] 
-  (with-mongo db
-    (drop-database! test-db)))
+  (drop-database! test-db))
  
-(defmacro with-test-mongo [& body]
-  `(do ~@body
-     (teardown!)))
+(defmacro with-test-mongo [db & body]
+  `(with-mongo db
+     (do ~@body
+       (teardown!))))
 
 (deftest mongo-io-dataset
-  (with-test-mongo
-    (with-mongo db
-      (is (push-ts test-coll ds))
-      (is (= 1.555
-             (first ($ :a (fetch-ts test-coll)))))
-      (is (= '(2.13 1.85)
-             ($ :a (fetch-dataset test-coll :where {:Date {:$gt 529646607456}})))
-          "query on epoch time"))))
+  (with-test-mongo db
+    (is (push-ts test-coll ds))
+    (is (= 1.555
+           (first ($ :a (fetch-ts test-coll)))))
+    (is (= '(2.13 1.85)
+           ($ :a (fetch-dataset test-coll :where {:Date {:$gt 529646607456}})))
+        "query on epoch time")))
 
-(deftest fetch-time-series
-  (with-test-mongo
+(deftest csv-mongo
+  (with-test-mongo db
+    (is (csv->mongo test-coll read-oanda-csv test-file))
+    (is (= 1.2964 
+           (first ($ :Bid (fetch-ts test-coll)))))))
+
+(deftest fetch-time-series ; TODO expand with querying
+  (with-test-mongo db
     (do (fill-db!)
-      (with-mongo db
-        (is (= ds
-               ($ (col-names ds) (fetch-ts test-coll))))))))
+      (is (= ds
+             ($ (col-names ds) (fetch-ts test-coll)))))))
 
 (deftest read-csv
   (is (= (time/date-time 2004 01 02 19 01 27) 
@@ -58,8 +62,8 @@
   (is (= 1.2964 
          (first ($ :Bid (read-ts-csv "dd/MM/YY HH:mm:ss" 
                                      [:Date :Bid :Ask] 
-                                     "data/testing.csv"))))
+                                     test-file))))
       "read-ts-csv: checking one element")
   (is (= 1.2964 
-         (first ($ :Bid (read-oanda-csv "data/testing.csv"))))
+         (first ($ :Bid (read-oanda-csv test-file))))
       "read-oanda-csv: checking one element"))
