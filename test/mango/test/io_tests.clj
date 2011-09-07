@@ -34,13 +34,16 @@
      (do ~@body
        (teardown!))))
 
-(deftest mongo-io-dataset
+(deftest utils-fn
+  (is (= '(529718400000 529804800000)
+         (when-query-map {:from (time/date-time 1986 10 15)
+                          :to (time/date-time 1986 10 16)}))))
+
+(deftest push-pull-data
   (with-test-mongo db
     (is (push-ts test-coll ds))
-    (is (= 1.555
-           (first ($ :a (fetch-ts test-coll)))))
-    (is (= '(2.13 1.85)
-           ($ :a (fetch-dataset test-coll :where {:Date {:$gt 529646607456}})))
+    (is (= 2.13
+           ($ :a (fetch-dataset test-coll :where {:Date {:$gte 529718400000 :$lt 529804800000}})))
         "query on epoch time")))
 
 (deftest csv-mongo
@@ -53,7 +56,12 @@
   (with-test-mongo db
     (do (fill-db!)
       (is (= ds
-             ($ (col-names ds) (fetch-ts test-coll)))))))
+             ($ (col-names ds) (fetch-ts test-coll))))
+      (is (= 1.555
+             (first ($ :a (fetch-ts test-coll)))))
+      (is (= 2.13
+             ($ :a (fetch-ts test-coll :when {:from (time/date-time 1986 10 15)
+                                              :to (time/date-time 1986 10 16)})))))))
 
 (deftest read-csv
   (is (= (time/date-time 2004 01 02 19 01 27) 

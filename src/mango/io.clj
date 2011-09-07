@@ -17,10 +17,17 @@
   [dataset]
   (transform-col :Date time.coerce/to-long dataset))
 
+(defn when-query-map
+  [{from-time :from, to-time :to}]
+  [(time.coerce/to-long from-time) (time.coerce/to-long to-time)])
+  
 (defn fetch-ts
 " Fetch time-series data from MongoDB. Wrap inside with-mongo."
-  [db-coll]
-    (long->date (fetch-dataset db-coll)))
+  [db-coll & {:keys [when]}]
+  (if when
+    (let [[from-long to-long] (when-query-map when)]
+      (long->date (fetch-dataset db-coll :where {:Date {:$gte from-long, :$lt to-long}})))
+    (long->date (fetch-dataset db-coll))))
 
 (defn push-ts
 " Push time-series data to MongoDB. Wrap inside with-mongo."
