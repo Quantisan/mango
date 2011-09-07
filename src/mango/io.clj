@@ -11,11 +11,11 @@
 
 (defn long->date
   [dataset]
-  (transform-col :Date time.coerce/from-long dataset))
+  (transform-col dataset :Date time.coerce/from-long))
 
 (defn date->long
   [dataset]
-  (transform-col :Date time.coerce/to-long dataset))
+  (transform-col dataset :Date time.coerce/to-long))
 
 (defn when-query-map
   [{from-time :from, to-time :to}]
@@ -26,7 +26,7 @@
   [db-coll & {:keys [when]}]
   (if when
     (let [[from-long to-long] (when-query-map when)]
-      (long->date (fetch-dataset db-coll :where {:Date {:$gte from-long, :$lt to-long}})))
+          (long->date (fetch-dataset db-coll :where {:Date {:$gte from-long, :$lt to-long}})))
     (long->date (fetch-dataset db-coll))))
 
 (defn push-ts
@@ -55,7 +55,7 @@
   [date-format column-names file]
   (let [data   (-> (read-dataset file :header false)
                       (col-names column-names))]
-    (transform-col :Date #(parse-time date-format %) data)))
+    (transform-col data :Date #(parse-time date-format %))))
 
 (defn read-oanda-csv
 " Reads a Oanda historical time series data file."
