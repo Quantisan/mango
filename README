@@ -1,13 +1,13 @@
 # mango
 
-FIXME: write description
+a concurrent systematic trading strategies backtesting platform
 
 ## Usage
 
-FIXME: write
+(backtest data-db '(strat1 strat2 strat3))
 
 ## License
 
-Copyright (C) 2011 FIXME
+Copyright (C) 2011 Paul Lam
 
 Distributed under the Eclipse Public License, the same as Clojure.
